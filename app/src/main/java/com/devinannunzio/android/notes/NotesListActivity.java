@@ -1,20 +1,26 @@
 package com.devinannunzio.android.notes;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.devinannunzio.android.notes.adapters.NotesRecyclerAdapter;
 import com.devinannunzio.android.notes.models.Note;
 import com.devinannunzio.android.notes.util.VerticalSpacingItemDecorator;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
-public class NotesListActivity extends AppCompatActivity implements NotesRecyclerAdapter.OnNoteListener {
+public class NotesListActivity extends AppCompatActivity implements
+        NotesRecyclerAdapter.OnNoteListener,
+        View.OnClickListener {
 
     //UI components
     private RecyclerView mRecyclerView;
@@ -31,6 +37,7 @@ public class NotesListActivity extends AppCompatActivity implements NotesRecycle
         mRecyclerView = findViewById(R.id.recyclerView);
         initRecyclerView();
         insertFakeNotes();
+        findViewById(R.id.fab).setOnClickListener(this);
 
         setSupportActionBar((Toolbar)findViewById(R.id.notesToolBar));
         setTitle("Notes");
@@ -50,6 +57,7 @@ public class NotesListActivity extends AppCompatActivity implements NotesRecycle
         mRecyclerView.setLayoutManager(linearLayoutManager);
         VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(10);
         mRecyclerView.addItemDecoration(itemDecorator);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(mRecyclerView);
         mNotesRecyclerAdapter = new NotesRecyclerAdapter(mNotes,this);
         mRecyclerView.setAdapter(mNotesRecyclerAdapter);
 
@@ -63,4 +71,26 @@ public class NotesListActivity extends AppCompatActivity implements NotesRecycle
         startActivity(intent);
 
     }
+
+    @Override
+    public void onClick(View view) {
+        Intent intent = new Intent(this,NoteActivity.class);
+        startActivity(intent);
+    }
+    private void deleteNote(Note note){
+        mNotes.remove(note);
+        mNotesRecyclerAdapter.notifyDataSetChanged();
+    }
+
+    private ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT|ItemTouchHelper.LEFT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            deleteNote(mNotes.get(viewHolder.getAdapterPosition()));
+        }
+    };
 }

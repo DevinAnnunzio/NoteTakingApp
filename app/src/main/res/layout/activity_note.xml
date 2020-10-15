@@ -15,18 +15,22 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/notesToolBar"
-            android:layout_width="wrap_content"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary">
+
+            <include layout="@layout/layout_note_toolbar"/>
+        </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
     
-    <EditText
+    <com.devinannunzio.android.notes.LinedEditText
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/notesText"
         android:textSize="23sp"
         android:textColor="@color/black"
-        android:padding="5dp"/>
+        android:padding="5dp"
+        android:gravity="top"
+        android:imeOptions="flagNoExtractUi"/>
 
 </LinearLayout>
