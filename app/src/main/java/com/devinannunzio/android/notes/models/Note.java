@@ -3,10 +3,27 @@ package com.devinannunzio.android.notes.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "notes")
 //Implement parcelable to pack obj to be passed in bundle
 public class Note implements Parcelable {
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
+    @NonNull
+    @ColumnInfo(name = "title")
     private String title;
+    @NonNull
+    @ColumnInfo(name = "content")
     private String content;
+    @NonNull
+    @ColumnInfo(name = "timestamp")
     private String timeStamp;
 
     public Note(String title, String content, String timeStamp) {
@@ -15,12 +32,13 @@ public class Note implements Parcelable {
         this.timeStamp = timeStamp;
     }
 
+    //Use ignore to tell Room which constructor to use
+    @Ignore
     public Note(){
-
     }
 
-    //parcelable implementation defines a way to pack objects
     protected Note(Parcel in) {
+        id = in.readInt();
         title = in.readString();
         content = in.readString();
         timeStamp = in.readString();
@@ -37,6 +55,15 @@ public class Note implements Parcelable {
             return new Note[size];
         }
     };
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
 
     public String getTitle() {
         return title;
@@ -62,17 +89,7 @@ public class Note implements Parcelable {
         this.timeStamp = timeStamp;
     }
 
-    @Override
-    public String toString() {
-        return "Note{" +
-                "title='" + title + '\'' +
-                ", content='" + content + '\'' +
-                ", timeStamp='" + timeStamp + '\'' +
-                '}';
-    }
 
-
-    //Parcelable implementations
     @Override
     public int describeContents() {
         return 0;
@@ -80,8 +97,19 @@ public class Note implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(id);
         parcel.writeString(title);
         parcel.writeString(content);
         parcel.writeString(timeStamp);
+    }
+
+    @Override
+    public String toString() {
+        return "Note{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", timeStamp='" + timeStamp + '\'' +
+                '}';
     }
 }

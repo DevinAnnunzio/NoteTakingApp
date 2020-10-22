@@ -5,18 +5,22 @@ import android.os.Bundle;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.devinannunzio.android.notes.adapters.NotesRecyclerAdapter;
 import com.devinannunzio.android.notes.models.Note;
+import com.devinannunzio.android.notes.persistence.NoteRepository;
 import com.devinannunzio.android.notes.util.VerticalSpacingItemDecorator;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class NotesListActivity extends AppCompatActivity implements
         NotesRecyclerAdapter.OnNoteListener,
@@ -28,6 +32,7 @@ public class NotesListActivity extends AppCompatActivity implements
     //Vars
     private ArrayList<Note> mNotes = new ArrayList<>();
     private NotesRecyclerAdapter mNotesRecyclerAdapter;
+    private NoteRepository mNoteRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +43,31 @@ public class NotesListActivity extends AppCompatActivity implements
         initRecyclerView();
         insertFakeNotes();
         findViewById(R.id.fab).setOnClickListener(this);
+        mNoteRepository = new NoteRepository(this);
+        retrieveNotes();
 
         setSupportActionBar((Toolbar)findViewById(R.id.notesToolBar));
         setTitle("Notes");
 
+    }
+
+    //use an observer in here to see changes to obj
+    //Call a method that returns a Live Data object and then observe changes to it
+    //Any DB calls using live data are default asynchronous
+    //Can't use room persistence library on main thread
+    private void retrieveNotes() {
+        mNoteRepository.getNotesItem().observe(this, new Observer<List<Note>>() {
+            @Override
+            public void onChanged(@Nullable List<Note> notes) {
+                if(mNotes.size() > 0){
+                    mNotes.clear();
+                }
+                if(notes != null){
+                    mNotes.addAll(notes);
+                }
+                mNotesRecyclerAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     private void insertFakeNotes(){
@@ -80,6 +106,7 @@ public class NotesListActivity extends AppCompatActivity implements
     private void deleteNote(Note note){
         mNotes.remove(note);
         mNotesRecyclerAdapter.notifyDataSetChanged();
+        mNoteRepository.deleteNote(note);
     }
 
     private ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT|ItemTouchHelper.LEFT) {

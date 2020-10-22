@@ -1,5 +1,6 @@
 package com.devinannunzio.android.notes.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +11,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.devinannunzio.android.notes.R;
 import com.devinannunzio.android.notes.models.Note;
+import com.devinannunzio.android.notes.util.Utility;
 
 import java.util.ArrayList;
 
 public class NotesRecyclerAdapter extends RecyclerView.Adapter<NotesRecyclerAdapter.ViewHolder> {
+
+    private static final String TAG = "NotesRecyclerAdapter";
 
     private ArrayList<Note> mNotes = new ArrayList<>();
     private OnNoteListener mOnNoteListener;
@@ -34,8 +38,17 @@ public class NotesRecyclerAdapter extends RecyclerView.Adapter<NotesRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.timeStamp.setText(mNotes.get(position).getTimeStamp());
-        holder.title.setText(mNotes.get(position).getTitle());
+        try{
+            String month = mNotes.get(position).getTimeStamp().substring(0,2);
+            month = Utility.getMonthFromNumber(month);
+            String year = mNotes.get(position).getTimeStamp().substring(3);
+            String timestamp = month + " " + year;
+            holder.timeStamp.setText(timestamp);
+            holder.title.setText(mNotes.get(position).getTitle());
+
+        }catch (NullPointerException e){
+            Log.e(TAG,"onBindViewHolder: NPE" + e.getMessage());
+        }
     }
 
     @Override
